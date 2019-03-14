@@ -1,0 +1,52 @@
+#!/bin/sh
+
+## GETTING SLEEPY PI TO SHUTDOWN THE RASPBERRY PI
+apt update
+
+# Modify /boot/config.txt to enable UART, etc.
+
+wget https://raw.githubusercontent.com/SpellFoundry/Sleepy-Pi-Setup/master/shutdowncheck.py
+chmod +x shutdowncheck.py
+mkdir /usr/local /usr/local/bin
+cp shutdowncheck.py /usr/local/bin/
+
+# Create /etc/rc.local and add "/usr/local/bin/shutdowncheck.py &" to it.
+
+## SETTING UP THE ARDUINO IDE ON RASPBIAN
+
+# Disable serial logon in /etc/inittab file.
+
+systemctl stop serial-getty@ttyS0.service
+systemctl disable serial-getty@ttyS0.service
+
+# Add "enable_uart=1" to /boot/config.txt.
+# Disable boot info in /boot/cmdline.txt file.
+
+apt install arduino
+
+wget -P /usr/local/src/ https://github.com/SpellFoundry/avrdude-rpi/archive/master.zip
+cd /usr/local/src
+unzip /usr/local/src/master.zip
+cd avrdude-rpi-master
+cp autoreset /usr/bin/
+cp avrdude-autoreset /usr/bin/
+mv /usr/bin/avrdude /usr/bin/avrdude.orig
+ln -s /usr/bin/avrdude-autoreset /usr/bin/avrdude
+
+mkdir ~/sketchbook ~/sketchbook/libraries ~/sketchbook/hardware ~/sketchbook/hardware/sleepy_pi
+wget -P ~/sketchbook/hardware/sleepy_pi2/ https://raw.githubusercontent.com/SpellFoundry/Sleepy-Pi-Setup/master/boards.txt
+cd ~/sketckbook/libraries
+git clone https://github.com/SpellFoundry/SleepyPi2.git
+git clone https://github.com/PaulStoffregen/Time.git
+git clone https://github.com/rocketscream/Low-Power.git
+mv Low-Power/ LowPower/
+git clone https://github.com/SpellFoundry/PCF8523.git
+git clone https://github.com/GreyGnome/PinChangeInt.git
+wget -P ~/sketchbook/ https://raw.githubusercontent.com/SpellFoundry/SleepyPi2/master/examples/ButtonOnOff2/ButtonOnOff2.ino
+
+# Power Bypass Jumper status:
+#i2cget -y 1 0x24
+# Power Bypass Jumper on:
+#i2cset -y 1 0x24 0xFD
+# Power Bypass Jumper off:
+#i2cset -y 1 0x24 0xFF

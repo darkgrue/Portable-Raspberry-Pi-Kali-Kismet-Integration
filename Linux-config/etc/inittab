@@ -1,0 +1,2 @@
+# disable serial login for Sleepy Pi
+#T0:23:respawn:/sbin/agetty -L ttyAMA0 115200 vt100

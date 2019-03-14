@@ -1,0 +1,6 @@
+#!/bin/sh
+
+/usr/bin/apt update
+/usr/bin/apt dist-upgrade
+/usr/bin/apt autoremove
+/usr/bin/apt autoclean

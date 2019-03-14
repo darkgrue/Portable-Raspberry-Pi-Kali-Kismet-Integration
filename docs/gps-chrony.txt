@@ -1,0 +1,33 @@
+## ACCESSING THE REAL TIME CLOCK FROM THE RASPBERRY PI
+
+# Modify /boot/config.txt to enable i2c bus and add RTC.
+# Modify /etc/modules and add i2c-bcm2708, i2c-dev to it.
+
+apt-get install i2c-tools
+
+# Modify /lib/udev/hwclock-set to disable changes to hwclock.
+
+apt-get --purge remove fake-hwclock
+
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+
+dmesg | grep rtc
+apt-get install chrony gpsd-clients gpsd gpsd-clients
+
+# Edit /etc/chrony/chrony.conf and add GPS time source.
+# Edit /etc/default/chrony and edit DAEMON_OPTS to remove system call filter.
+# Edit /etc/systemd/system/chronyd.service to add " gpsd.service hwclock.service" to AFTER=.
+
+systemctl enable chrony
+
+rm /lib/systemd/system/hwclock.service
+systemctl daemon-reload
+
+# Test:
+gpsmon /dev/gps0
+
+hwclock -r -v
+
+chronyc sources -v
+chronyc tracking
